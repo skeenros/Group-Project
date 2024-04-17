@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Define file paths
 batting_file_path = r"C:\Users\SkeenRH24\Downloads\Batting.xlsx"
@@ -43,3 +44,17 @@ for category, age_range in peak_performance.items():
     print(f"{category}: {age_range} years old")
 
 # Additional analysis or visualization can be performed here
+    
+# Plotting peak performance for each category
+plt.figure(figsize=(12, 8))
+
+categories = ['AB', 'H', 'HR', 'SO', 'ERA']  # Batting and pitching categories
+for i, category in enumerate(categories, 1):
+    plt.subplot(3, 2, i)
+    plt.plot(average_stats_by_age.index, average_stats_by_age[category], marker='o', linestyle='-')
+    plt.title(f'{category} Over Age')
+    plt.xlabel('Age')
+    plt.ylabel(category)
+
+plt.tight_layout()
+plt.show()
