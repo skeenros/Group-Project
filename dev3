@@ -1,0 +1,45 @@
+import pandas as pd
+
+# Define file paths
+batting_file_path = r"C:\Users\SkeenRH24\Downloads\Batting.xlsx"
+pitching_file_path = r"C:\Users\SkeenRH24\Downloads\Pitching.xlsx"
+people_file_path = r"C:\Users\SkeenRH24\Downloads\People.xlsx"
+
+# Read Excel files into pandas DataFrames
+batting_df = pd.read_excel(batting_file_path)
+pitching_df = pd.read_excel(pitching_file_path)
+people_df = pd.read_excel(people_file_path)
+
+# Filter batting data for relevant columns
+batting_df = batting_df[['playerID', 'yearID', 'AB', 'H', 'HR']]
+
+# Filter pitching data for relevant columns
+pitching_df = pitching_df[['playerID', 'yearID', 'SO', 'ERA']]
+
+# Merge batting and pitching data on playerID and yearID
+player_stats_df = pd.merge(batting_df, pitching_df, on=['playerID', 'yearID'], how='outer')
+
+# Merge player names with player stats
+player_stats_df = pd.merge(player_stats_df, people_df[['playerID', 'nameGiven']], on='playerID', how='left')
+
+# Calculate player age for each season
+current_year = pd.Timestamp.now().year
+player_stats_df['age'] = current_year - player_stats_df['yearID']
+
+# Group by age and calculate average statistics for each age
+average_stats_by_age = player_stats_df.groupby('age').mean()
+
+# Identify peak performance age ranges for various statistical categories
+peak_performance = {}
+categories = ['AB', 'H', 'HR', 'SO', 'ERA']  # Batting and pitching categories
+
+for category in categories:
+    peak_age_range = average_stats_by_age[category].idxmax()
+    peak_performance[category] = peak_age_range
+
+# Print peak performance age ranges for each statistical category
+print("Peak Performance Age Ranges:")
+for category, age_range in peak_performance.items():
+    print(f"{category}: {age_range} years old")
+
+# Additional analysis or visualization can be performed here
