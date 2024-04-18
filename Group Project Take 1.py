@@ -12,10 +12,7 @@ df = pd.merge(batting_df, people_df, on='playerID')
 df['age'] = df['yearID'] - df['birthYear']
 
 # Filter out records where 'AB' is 0 and 'age' is not within a reasonable range
-df = df[(df['AB'] >= 400) & (df['age'] >= 20) & (df['age'] <= 38)]
-
-# Set a threshold for the minimum number of players per age group
-min_players_per_age = 100
+df = df[(df['AB'] != 0) & (df['age'] >= 19) & (df['age'] <= 45)]
 
 # Group the data by age and sum up 'H' and 'AB' for each age
 grouped_by_age = df.groupby('age').agg(
