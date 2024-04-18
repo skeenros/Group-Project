@@ -12,25 +12,35 @@ df = pd.merge(batting_df, people_df, on='playerID')
 df['age'] = df['yearID'] - df['birthYear']
 
 # Filter out records where 'AB' is 0 and 'age' is not within a reasonable range
-df = df[(df['AB'] != 0) & (df['age'] >= 19) & (df['age'] <= 45)]
+df = df[(df['AB'] >= 400) & (df['age'] >= 20) & (df['age'] <= 38)]
+
+# Set a threshold for the minimum number of players per age group
+min_players_per_age = 100
 
 # Group the data by age and sum up 'H' and 'AB' for each age
-sums_by_age = df.groupby('age')[['H', 'AB']].sum()
+grouped_by_age = df.groupby('age').agg(
+    total_hits=('H', 'sum'),
+    total_at_bats=('AB', 'sum'),
+    num_players=('playerID', 'nunique')
+)
 
-# Calculate the batting average for each age
-sums_by_age['batting_average'] = sums_by_age['H'] / sums_by_age['AB']
+# Filter out age groups that do not meet the minimum player threshold
+grouped_by_age = grouped_by_age[grouped_by_age['num_players'] >= min_players_per_age]
 
-# Find the age with the highest average batting average
-peak_batting_age = sums_by_age['batting_average'].idxmax()
+# Calculate the weighted batting average for each age
+grouped_by_age['weighted_batting_average'] = grouped_by_age['total_hits'] / grouped_by_age['total_at_bats']
 
-print(f'The age with the highest average batting average is {peak_batting_age}.')
+# Find the age with the highest weighted batting average
+peak_batting_age = grouped_by_age['weighted_batting_average'].idxmax()
+
+print(f"The age with the highest weighted batting average is {peak_batting_age}.")
 
 # Create a plot
 plt.figure(figsize=(10, 6))
-plt.plot(sums_by_age.index, sums_by_age['batting_average'])
-plt.scatter(peak_batting_age, sums_by_age['batting_average'].max(), color='red')  # mark the peak
+plt.plot(grouped_by_age.index, grouped_by_age['weighted_batting_average'])
+plt.scatter(peak_batting_age, grouped_by_age['weighted_batting_average'].max(), color='red')  # mark the peak
 plt.xlabel('Age')
-plt.ylabel('Average Batting Average')
-plt.title('Average Batting Average by Age')
+plt.ylabel('Weighted Batting Average')
+plt.title('Weighted Batting Average by Age')
 plt.grid(True)
 plt.show()
